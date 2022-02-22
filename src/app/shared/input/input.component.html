@@ -1,0 +1,15 @@
+<input [formControl]="control" [type]="type"
+       class="block w-full py-1.5 px-3 text-gray-200 border border-gray-400 transition
+                  duration-500 focus:outline-none rounded bg-transparent focus:border-indigo-400"
+       [placeholder]="placeholder" [mask]="format" [dropSpecialCharacters]="false"/>
+<!--    <p>{{registerForm.controls.name?.errors}}</p>-->
+<!--    novo metodo angular 13-->
+<div *ngIf="control.touched && control.invalid" class="text-red-400">
+  <div *ngIf="control.errors && control.errors['required']">required.</div>
+  <div *ngIf="control.errors && control.errors['minlength']">should be {{control.errors['minlength'].requiredLength}} character.</div>
+  <div *ngIf="control.errors && control.errors['email']">Email is invalid.</div>
+  <div *ngIf="control.errors && control.errors['min']">You should be at least 18.</div>
+  <div *ngIf="control.errors && control.errors['max']">You should be max 120.</div>
+  <div *ngIf="control.errors && control.errors['pattern']">Password must have 8 chars, 1 uppercase, 1 lower case and 1 number</div>
+
+</div>
