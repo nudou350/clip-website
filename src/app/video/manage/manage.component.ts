@@ -1,0 +1,99 @@
+import { Component, OnInit } from '@angular/core';
+import {ActivatedRoute, Params, Router} from "@angular/router";
+import {ClipService} from "../../services/clip.service";
+import IClip from "../../models/clip.model";
+import {ModalService} from "../../services/modal.service";
+import {BehaviorSubject} from "rxjs";
+
+@Component({
+  selector: 'app-manage',
+  templateUrl: './manage.component.html',
+  styleUrls: ['./manage.component.css']
+})
+export class ManageComponent implements OnInit {
+  videoOrder = '1'
+  clips: IClip[] = []
+  activeClip: IClip|null = null
+  sort$: BehaviorSubject<string> //$ pra identificar observables
+
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private clipService : ClipService,
+    private modal: ModalService) {
+    this.sort$ = new BehaviorSubject<string>(this.videoOrder)
+
+  }
+
+  ngOnInit(): void {
+
+    this.route.queryParamMap.subscribe((params: Params) => {
+      this.videoOrder = params['sort'] === '2' ? params['sort'] : '1'
+      this.sort$.next(this.videoOrder)
+    })
+
+    this.clipService.getUserClips(this.sort$).subscribe(docs => {
+      this.clips = []
+
+      docs.forEach(doc => {
+        this.clips.push({
+          docID: doc.id,
+          ...doc.data() //spread ... faz um spread dos datos no objeto
+        })
+      })
+    })
+  }
+
+  sort(event: Event){
+    const {value} = (event.target as HTMLSelectElement)
+   // this.router.navigateByUrl(`/manage?sort=${value}`) metodo 1, simples
+
+    this.router.navigate([], { //metodo 2 pra mudar os query params
+      relativeTo: this.route,
+      queryParams: {
+        sort: value
+      }
+    })
+  }
+
+  openModal($event: Event, clip: IClip){
+    $event.preventDefault()
+
+    this.activeClip = clip
+
+    this.modal.toggleModal('editClip')
+  }
+
+  update($event : IClip){
+    this.clips.forEach((element, index) => {
+      if(element.docID == $event.docID){
+        this.clips[index].title = $event.title
+      }
+    })
+  }
+
+  deleteClip($event : Event, clip){
+    $event.preventDefault()
+    this.clipService.deleteClip(clip)
+
+    this.clips.forEach((element, index) =>{
+      if(element.docID == clip.docID){
+        this.clips.splice(index,1)
+      }
+    })
+  }
+
+  async copyToClipBoard($event: MouseEvent, docID: string | undefined) {
+    $event.preventDefault()
+
+    if(!docID) {
+      return
+    }
+
+    const url = `${location.origin}/clip/${docID}`
+
+    await navigator.clipboard.writeText(url)
+
+    alert('Link copied!')
+  }
+}

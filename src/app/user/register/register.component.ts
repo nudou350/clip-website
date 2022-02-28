@@ -1,6 +1,8 @@
 import { Component} from '@angular/core';
 import {FormGroup, FormControl, Validators} from "@angular/forms";
 import {AuthService} from "../../services/auth.service";
+import {RegisterValidatorsComponent} from "../validators/register-validators/register-validators.component";
+import {EmailTaken} from "../validators/email-taken";
 
 @Component({
   selector: 'app-register',
@@ -9,14 +11,15 @@ import {AuthService} from "../../services/auth.service";
 })
 export class RegisterComponent {
   constructor(
-  private auth: AuthService
+  private auth: AuthService,
+  private emailTaken: EmailTaken
   ) {}
 
   inSubmission = false
 
 
   name= new FormControl('', [Validators.required, Validators.minLength(3)])
-  email= new FormControl('', [Validators.email, Validators.required])
+  email= new FormControl('', [Validators.email, Validators.required], [this.emailTaken.validate])
   age= new FormControl('',[Validators.min(18), Validators.required, Validators.max(120)])
   password= new FormControl('', [Validators.required, Validators.pattern(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/)])
   confirm_password= new FormControl('', [Validators.required])
@@ -33,7 +36,7 @@ export class RegisterComponent {
     password : this.password,
     confirm_password : this.confirm_password,
     phoneNumber : this.phoneNumber
-  })
+  }, [RegisterValidatorsComponent.match('password', 'confirm_password')])
 
 
   async register(){

@@ -7,11 +7,13 @@ import { RegisterComponent } from './register/register.component';
 import {ReactiveFormsModule, FormsModule} from "@angular/forms";
 
 
+
 @NgModule({
   declarations: [
     AuthModalComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+
   ],
   exports: [
     AuthModalComponent,
